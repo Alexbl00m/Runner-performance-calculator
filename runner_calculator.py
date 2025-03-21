@@ -9,129 +9,6 @@ import io
 from PIL import Image
 import os
 
-# Setup page configuration
-st.set_page_config(
-    page_title="Runner Performance Calculator",
-    page_icon="🏃",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Custom CSS styling (matching your brand)
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-
-html, body, [class*="css"] {
-    font-family: 'Montserrat', sans-serif;
-}
-
-.main {
-    background-color: #FFFFFF;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    color: #E6754E;
-}
-
-.stButton>button {
-    background-color: #E6754E;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-}
-
-.stButton>button:hover {
-    background-color: #c45d3a;
-}
-
-.highlight {
-    color: #E6754E;
-    font-weight: 600;
-}
-
-.result-box {
-    background-color: #f8f8f8;
-    padding: 20px;
-    border-radius: 10px;
-    border-left: 5px solid #E6754E;
-    margin-bottom: 20px;
-}
-
-.zone-header {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.zone-pace {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 5px;
-    color: #E6754E;
-}
-
-.zone-description {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 0;
-}
-
-footer {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
-    color: #888888;
-    text-align: center;
-    margin-top: 50px;
-}
-
-/* Custom divider */
-.custom-divider {
-    height: 3px;
-    background-color: #E6754E;
-    margin: 20px 0;
-    border-radius: 2px;
-}
-
-/* Streamlit component overrides */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 10px;
-}
-
-.stTabs [data-baseweb="tab"] {
-    padding: 10px 20px;
-    background-color: #f5f5f5;
-    border-radius: 5px 5px 0 0;
-    font-weight: 500;
-}
-
-.stTabs [aria-selected="true"] {
-    background-color: #E6754E !important;
-    color: white !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Function to load and display logo
-def setup_logo():
-    """Setup and display the logo"""
-    try:
-        if os.path.exists("logo.png"):
-            logo = Image.open("logo.png")
-            return logo
-        else:
-            # Create a basic placeholder logo
-            img = Image.new('RGBA', (400, 200), color=(255, 255, 255, 0))
-            return img
-    except Exception as e:
-        st.warning(f"Could not load or create logo: {e}")
-        return None
-
 # Utility functions for pace calculations
 def format_time_input(time_str):
     """Format time string for input validation"""
@@ -221,7 +98,7 @@ def cameron_race_prediction(times, distances):
     Based on the curve fitting approach for a power-law relationship
     """
     if len(times) < 2 or len(distances) < 2:
-        return lambda d: riegel_race_prediction(distances[0], times[0], d)
+        return lambda d: riegel_race_prediction(distances[0], times[0], d), 1.06
     
     # Take log of distances and times
     log_distances = np.log(distances)
@@ -253,16 +130,8 @@ def calculate_running_zones(threshold_pace_sec):
 
 def main():
     """Main application function"""
-    # Setup sidebar
-    logo = setup_logo()
-    if logo:
-        st.sidebar.image(logo, width=200)
-    
-    st.sidebar.title("Runner Performance Calculator")
-    st.sidebar.markdown("Predict race times and training zones based on your previous performances")
-    
     # Create tabs
-    tab1, tab2, tab3 = st.tabs(["Race Predictor", "Training Zones", "About"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Race Predictor", "Training Zones", "Pace Calculator", "About"])
     
     with tab1:
         st.header("Race Time Predictor")
@@ -305,6 +174,47 @@ def main():
             <span style="font-weight: bold;">Pace:</span> {pace1_km} min/km | {pace1_mile} min/mile
             </div>
             """, unsafe_allow_html=True)
+    
+    with tab4:
+        st.header("About the Runner Performance Calculator")
+        
+        st.markdown("""
+        <div class="result-box">
+        <h3>How This Calculator Works</h3>
+        <p>The Runner Performance Calculator uses advanced mathematical models to predict your race times across different distances based on your previous performances. It employs a modified version of Peter Riegel's formula with an adaptive fatigue factor calculated from your input data.</p>
+        
+        <p>The basic equation used is:</p>
+        <p style="font-style: italic; font-weight: bold; text-align: center; margin: 20px 0;">
+            T2 = T1 × (D2/D1)<sup>f</sup>
+        </p>
+        
+        <p>Where:</p>
+        <ul>
+            <li>T2 is the predicted time for distance D2</li>
+            <li>T1 is your known time for distance D1</li>
+            <li>f is the fatigue factor (typically between 1.05 and 1.15)</li>
+        </ul>
+        
+        <p>When multiple performances are provided, the calculator employs curve fitting to determine the optimal fatigue factor specifically for you.</p>
+        </div>
+        
+        <div class="result-box">
+        <h3>Training Zones Methodology</h3>
+        <p>The training zones are calculated using the Yousli 7-zone system, which is based on your threshold pace. The threshold is determined by analyzing your performances with special emphasis on races in the 5K-10K range, which typically represent a good approximation of lactate threshold for most runners.</p>
+        
+        <p>These zones provide structured intensity guidelines for different types of workouts, helping you train more efficiently and reduce the risk of injury by ensuring you're running at the appropriate effort level for each training session.</p>
+        </div>
+        
+        <div class="result-box">
+        <h3>Tips for Accurate Predictions</h3>
+        <ul>
+            <li>Use recent race results or time trials for the most accurate predictions</li>
+            <li>Include performances from different distances to improve the accuracy of the fatigue factor</li>
+            <li>For best results, at least one of your performances should be from a distance similar to your target race</li>
+            <li>Remember that predictions assume similar conditions (weather, terrain, elevation) and optimal race preparation</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         with col2:
             st.subheader("Second Effort")
@@ -382,6 +292,138 @@ def main():
                 <span style="font-weight: bold;">Pace:</span> {pace3_km} min/km | {pace3_mile} min/mile
                 </div>
                 """, unsafe_allow_html=True)
+            
+        # If we have valid pace, calculate and display splits
+        if pace_seconds_per_km > 0 and race_distance_km > 0:
+            st.markdown("### Race Splits")
+            
+            # Determine if kilometer or mile splits are more appropriate
+            if race_distance_km < 3:
+                # For shorter races, use 400m splits
+                split_distance = 0.4  # km
+                split_label = "400m"
+                num_splits = int(race_distance_km / split_distance)
+                partial_split = race_distance_km % split_distance
+            elif race_distance_km < 10:
+                # For medium races, use kilometer splits
+                split_distance = 1.0  # km
+                split_label = "1 km"
+                num_splits = int(race_distance_km)
+                partial_split = race_distance_km - num_splits
+            else:
+                # For longer races, use mile splits
+                split_distance = 1.60934  # km (1 mile)
+                split_label = "1 mile"
+                num_splits = int(race_distance_km / split_distance)
+                partial_split = race_distance_km % split_distance
+            
+            # Calculate split times based on strategy
+            splits_data = []
+            halfway_point = num_splits / 2
+            cumulative_time = 0
+            
+            for i in range(1, num_splits + 1):
+                # For negative/positive splits, adjust based on position in race
+                if pace_strategy == "Even Pace":
+                    adjusted_pace = pace_seconds_per_km
+                else:
+                    if i <= halfway_point:
+                        adjusted_pace = pace_seconds_per_km * (1 + split_factor)
+                    else:
+                        adjusted_pace = pace_seconds_per_km * (1 - split_factor)
+                
+                split_time = adjusted_pace * split_distance
+                cumulative_time += split_time
+                
+                splits_data.append({
+                    "Split": f"{i} ({split_label})",
+                    "Distance": f"{i * split_distance:.2f} km",
+                    "Split Time": seconds_to_time_str(split_time),
+                    "Pace": format_pace(adjusted_pace),
+                    "Cumulative Time": seconds_to_time_str(cumulative_time)
+                })
+            
+            # Add partial split if needed
+            if partial_split > 0.01:  # Only if it's significant
+                # For the partial split, use the final pace adjustment
+                if pace_strategy == "Even Pace":
+                    adjusted_pace = pace_seconds_per_km
+                else:
+                    adjusted_pace = pace_seconds_per_km * (1 - split_factor)
+                
+                split_time = adjusted_pace * partial_split
+                cumulative_time += split_time
+                
+                splits_data.append({
+                    "Split": f"Final ({partial_split*1000:.0f}m)",
+                    "Distance": f"{race_distance_km:.2f} km",
+                    "Split Time": seconds_to_time_str(split_time),
+                    "Pace": format_pace(adjusted_pace),
+                    "Cumulative Time": seconds_to_time_str(cumulative_time)
+                })
+            
+            # Display splits in a table
+            splits_df = pd.DataFrame(splits_data)
+            st.dataframe(splits_df, hide_index=True, use_container_width=True)
+            
+            # Create a visualization of split paces
+            st.markdown("### Split Visualization")
+            
+            fig = px.bar(
+                splits_data, 
+                x="Split", 
+                y=[format_pace(pace_seconds_per_km)]*len(splits_data), 
+                title="Race Splits vs. Target Pace",
+                labels={"y": "Pace (min/km)", "x": "Split"}
+            )
+            
+            # Add a line for target pace
+            fig.add_shape(
+                type="line",
+                x0=-0.5,
+                x1=len(splits_data)-0.5,
+                y0=format_pace(pace_seconds_per_km),
+                y1=format_pace(pace_seconds_per_km),
+                line=dict(
+                    color="red",
+                    width=2,
+                    dash="dash",
+                )
+            )
+            
+            # Add annotation for target pace
+            fig.add_annotation(
+                x=len(splits_data)-0.5,
+                y=format_pace(pace_seconds_per_km),
+                text=f"Target Pace: {format_pace(pace_seconds_per_km)} min/km",
+                showarrow=False,
+                yshift=10,
+                font=dict(color="red")
+            )
+            
+            # Customize layout
+            fig.update_layout(
+                template="plotly_white",
+                height=400,
+                xaxis_title="Race Segments",
+                yaxis_title="Pace (min/km)"
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Add tips for race execution
+            st.markdown("""
+            <div class="result-box">
+                <h3>Race Execution Tips</h3>
+                <ul>
+                    <li><strong>Start conservatively</strong> - Many runners go out too fast and pay for it later</li>
+                    <li><strong>Focus on effort</strong> - Pay attention to your perceived exertion rather than just the watch</li>
+                    <li><strong>Adjust for conditions</strong> - Heat, wind, and hills will affect your pace; be flexible</li>
+                    <li><strong>Fuel properly</strong> - For races over 75 minutes, ensure adequate carbohydrate intake</li>
+                    <li><strong>Mental check-ins</strong> - Break the race into segments and focus on executing each segment well</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
         
@@ -594,7 +636,7 @@ def main():
         threshold_pace_seconds = None
         threshold_distance = None
         
-        if len(distances) > 0 and len(times) > 0:
+        if 'distances' in locals() and 'times' in locals() and len(distances) > 0 and len(times) > 0:
             # Find the closest race to 5K-10K range as threshold indicator
             distances_array = np.array(distances)
             threshold_idx = np.argmin(np.abs(distances_array - 5.0))
@@ -684,4 +726,239 @@ def main():
                         <div class="zone-pace">
                             {min_pace_km if min_pace_km != "faster" else "faster"} - {max_pace_km} min/km
                         </div>
-                        <div class="zone-pace" style="font-size: 16px; color: #
+                        <div class="zone-pace" style="font-size: 16px; color: #666;">
+                            {min_pace_mile if min_pace_mile != "faster" else "faster"} - {max_pace_mile} min/mile
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            # Display zone descriptions
+            st.markdown("""
+            <h3 style="margin-top: 30px;">Training Zone Descriptions</h3>
+            """, unsafe_allow_html=True)
+            
+            zone_descriptions = [
+                {
+                    "Zone": "Easy",
+                    "Description": "Very easy, recovery runs. Builds base aerobic fitness and allows for recovery between harder sessions.",
+                    "Effort": "Very light effort, could hold a full conversation easily",
+                    "Use For": "Recovery days, warm-ups, cool-downs"
+                },
+                {
+                    "Zone": "Zone 2",
+                    "Description": "Light aerobic work that develops fat metabolism and cardiovascular efficiency.",
+                    "Effort": "Comfortable pace, can hold a conversation",
+                    "Use For": "Long runs, recovery runs, base building"
+                },
+                {
+                    "Zone": "Endurance",
+                    "Description": "Moderate effort that builds aerobic capacity. The pace you could maintain for a long time.",
+                    "Effort": "Moderately challenging but sustainable, conversation becomes more difficult",
+                    "Use For": "Longer tempo runs, marathon pace training"
+                },
+                {
+                    "Zone": "Threshold",
+                    "Description": "This is your lactate threshold pace, approximately your 10K-15K race pace.",
+                    "Effort": "Comfortably hard, limited talking possible",
+                    "Use For": "Tempo runs, threshold intervals (3-5 minute repeats)"
+                },
+                {
+                    "Zone": "Suprathreshold",
+                    "Description": "Just above threshold, roughly 5K race pace for trained runners.",
+                    "Effort": "Hard but sustainable for 5K, breathing becomes labored",
+                    "Use For": "5K-specific workouts, shorter intervals (2-3 minutes)"
+                },
+                {
+                    "Zone": "VO2max",
+                    "Description": "High-intensity effort that develops maximum aerobic capacity, similar to 1500m-3000m race pace.",
+                    "Effort": "Very hard, breathing heavily, only a few words possible at a time",
+                    "Use For": "VO2max intervals (2-5 minutes with equal recovery)"
+                },
+                {
+                    "Zone": "Power",
+                    "Description": "Maximum intensity, develops neuromuscular power and anaerobic capacity.",
+                    "Effort": "All-out effort, not sustainable for more than 1-2 minutes",
+                    "Use For": "Short intervals, sprints, strides (15s-90s with full recovery)"
+                }
+            ]
+            
+            # Display zone descriptions as a table
+            zone_df = pd.DataFrame(zone_descriptions)
+            st.dataframe(zone_df, hide_index=True, use_container_width=True)
+        
+        else:
+            st.warning("Please enter at least one valid effort in the Race Predictor tab to calculate training zones.")
+    
+    with tab3:
+        st.header("Race Pace Calculator")
+        st.markdown("""
+        <div class="result-box">
+        Plan your race strategy by calculating split times and finish times. Enter your target pace or target time to get detailed lap breakdowns.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Race Information")
+            
+            # Race distance selection
+            race_options = {
+                "400m": 0.4,
+                "800m": 0.8,
+                "1000m": 1.0,
+                "1500m": 1.5,
+                "1 mile": 1.60934,
+                "3000m": 3.0,
+                "5K": 5.0,
+                "10K": 10.0,
+                "15K": 15.0,
+                "Half Marathon": 21.0975,
+                "Marathon": 42.195,
+                "Custom Distance": 0
+            }
+            
+            race_distance_choice = st.selectbox(
+                "Race Distance", 
+                list(race_options.keys()),
+                index=6,  # Default to 5K
+                key="pace_race_distance"
+            )
+            
+            # If custom distance is selected, allow user input
+            if race_distance_choice == "Custom Distance":
+                custom_distance = st.number_input("Enter distance in kilometers:", min_value=0.1, max_value=100.0, value=5.0, step=0.1)
+                race_distance_km = custom_distance
+            else:
+                race_distance_km = race_options[race_distance_choice]
+            
+            # Calculate lap and mile count
+            lap_count = race_distance_km / 0.4  # Standard track lap is 400m
+            mile_count = race_distance_km / 1.60934
+            
+            # Display track laps and miles
+            st.markdown(f"""
+            <div style="background-color: #f8f8f8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                <span style="font-weight: bold;">Distance:</span> {race_distance_km} km
+                <br><span style="font-weight: bold;">Track laps (400m):</span> {lap_count:.2f}
+                <br><span style="font-weight: bold;">Miles:</span> {mile_count:.2f}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Allow user to select pace strategy
+            pace_strategy = st.radio(
+                "Pacing Strategy",
+                ["Even Pace", "Negative Split", "Positive Split"],
+                horizontal=True
+            )
+            
+            # Split settings based on strategy
+            if pace_strategy == "Even Pace":
+                st.info("Even pace: maintain the same pace throughout the entire race.")
+                split_factor = 0.0
+            elif pace_strategy == "Negative Split":
+                split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="+%g")
+                st.info(f"First half {split_factor:.0%} slower, second half {split_factor:.0%} faster")
+            else:  # Positive Split
+                split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="-%g")
+                st.info(f"First half {split_factor:.0%} faster, second half {split_factor:.0%} slower")
+                split_factor = -split_factor  # Negate for calculations
+        
+        with col2:
+            st.subheader("Pace Input")
+            
+            # Option to input by pace or time
+            input_method = st.radio(
+                "Input Method",
+                ["Target Pace", "Target Time"],
+                horizontal=True
+            )
+            
+            if input_method == "Target Pace":
+                pace_unit = st.radio("Pace Unit", ["min/km", "min/mile"], horizontal=True)
+                
+                if pace_unit == "min/km":
+                    pace_input = st.text_input("Target Pace (min:sec per km)", "5:00")
+                    try:
+                        pace_parts = pace_input.split(":")
+                        if len(pace_parts) == 2:
+                            pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
+                            pace_seconds_per_km = pace_min * 60 + pace_sec
+                        else:
+                            pace_seconds_per_km = float(pace_input) * 60
+                        
+                        # Calculate total time
+                        total_seconds = pace_seconds_per_km * race_distance_km
+                        
+                    except ValueError:
+                        st.error("Please enter a valid pace in the format min:sec or decimal minutes")
+                        pace_seconds_per_km = 0
+                        total_seconds = 0
+                else:
+                    pace_input = st.text_input("Target Pace (min:sec per mile)", "8:00")
+                    try:
+                        pace_parts = pace_input.split(":")
+                        if len(pace_parts) == 2:
+                            pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
+                            pace_seconds_per_mile = pace_min * 60 + pace_sec
+                        else:
+                            pace_seconds_per_mile = float(pace_input) * 60
+                        
+                        # Convert to seconds per km
+                        pace_seconds_per_km = pace_seconds_per_mile / 1.60934
+                        
+                        # Calculate total time
+                        total_seconds = pace_seconds_per_km * race_distance_km
+                        
+                    except ValueError:
+                        st.error("Please enter a valid pace in the format min:sec or decimal minutes")
+                        pace_seconds_per_km = 0
+                        total_seconds = 0
+            else:
+                # Input target finish time
+                col_h, col_m, col_s = st.columns(3)
+                with col_h:
+                    hours = st.number_input("Hours", min_value=0, max_value=24, value=0)
+                with col_m:
+                    minutes = st.number_input("Minutes", min_value=0, max_value=59, value=20)
+                with col_s:
+                    seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
+                
+                total_seconds = hours * 3600 + minutes * 60 + seconds
+                
+                # Calculate pace
+                if race_distance_km > 0:
+                    pace_seconds_per_km = total_seconds / race_distance_km
+                else:
+                    pace_seconds_per_km = 0
+            
+            # Calculate and display results if valid pace
+            if pace_seconds_per_km > 0:
+                # Convert back to min:sec format
+                pace_min = int(pace_seconds_per_km // 60)
+                pace_sec = int(pace_seconds_per_km % 60)
+                pace_km_formatted = f"{pace_min}:{pace_sec:02d}"
+                
+                # Calculate mi/pace
+                pace_seconds_per_mile = pace_seconds_per_km * 1.60934
+                pace_mile_min = int(pace_seconds_per_mile // 60)
+                pace_mile_sec = int(pace_seconds_per_mile % 60)
+                pace_mile_formatted = f"{pace_mile_min}:{pace_mile_sec:02d}"
+                
+                # Calculate finish time
+                finish_time = seconds_to_time_str(total_seconds)
+                
+                st.markdown(f"""
+                <div class="result-box" style="margin-top: 20px; text-align: center;">
+                    <h3 style="color: #E6754E;">Race Summary</h3>
+                    <div style="font-size: 24px; font-weight: bold; margin: 15px 0;">
+                        {finish_time}
+                    </div>
+                    <div style="font-size: 16px; margin-bottom: 5px;">
+                        Pace: {pace_km_formatted} min/km | {pace_mile_formatted} min/mile
+                    </div>
+                    <div style="font-size: 14px; color: #666;">
+                        Speed: {(60 / (pace_seconds_per_km / 60)):.2f} km/h | {(60 / (pace_seconds_per_km / 60) / 1.60934):.2f} mph
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
