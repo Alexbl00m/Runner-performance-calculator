@@ -200,7 +200,7 @@ def main():
         
         <div class="result-box">
         <h3>Training Zones Methodology</h3>
-        <p>The training zones are calculated using the Yousli 7-zone system, which is based on your threshold pace. The threshold is determined by analyzing your performances with special emphasis on races in the 5K-10K range, which typically represent a good approximation of lactate threshold for most runners.</p>
+        <p>The training zones are calculated using the Lindblom Coaching 7-zone system, which is based on your threshold pace. The threshold is determined by analyzing your performances with special emphasis on races in the 5K-10K range, which typically represent a good approximation of lactate threshold for most runners.</p>
         
         <p>These zones provide structured intensity guidelines for different types of workouts, helping you train more efficiently and reduce the risk of injury by ensuring you're running at the appropriate effort level for each training session.</p>
         </div>
@@ -925,6 +925,11 @@ def main():
                     seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
                 
                 total_seconds = hours * 3600 + minutes * 60 + seconds
+
+                # Initialize variables with default values
+                pace_seconds_per_km = 0
+                race_distance_km = 0
+                total_seconds = 0
                 
                 # Calculate pace
                 if race_distance_km > 0:
