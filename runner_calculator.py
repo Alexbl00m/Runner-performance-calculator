@@ -292,7 +292,12 @@ def main():
                 <span style="font-weight: bold;">Pace:</span> {pace3_km} min/km | {pace3_mile} min/mile
                 </div>
                 """, unsafe_allow_html=True)
-            
+
+        # Initialize variables with default values
+        pace_seconds_per_km = 0
+        race_distance_km = 0
+        total_seconds = 0
+        
         # If we have valid pace, calculate and display splits
         if pace_seconds_per_km > 0 and race_distance_km > 0:
             st.markdown("### Race Splits")
@@ -926,11 +931,6 @@ def main():
                 
                 total_seconds = hours * 3600 + minutes * 60 + seconds
 
-                # Initialize variables with default values
-                pace_seconds_per_km = 0
-                race_distance_km = 0
-                total_seconds = 0
-                
                 # Calculate pace
                 if race_distance_km > 0:
                     pace_seconds_per_km = total_seconds / race_distance_km
