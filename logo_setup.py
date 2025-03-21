@@ -7,7 +7,7 @@ def create_logo():
     Creates a branded logo for the Runner Performance Calculator
     Returns the path to the logo file.
     """
-    logo_path = "logo.png"
+    logo_path = "Logotype_Light@2x.png"
     
     # Check if logo already exists
     if os.path.exists(logo_path):
