@@ -116,7 +116,7 @@ def cameron_race_prediction(times, distances):
     return predict, b
 
 def calculate_running_zones(threshold_pace_sec):
-    """Calculate Yousli running zones based on threshold pace in seconds per km"""
+    """Calculate Lindblom coachings running zones based on threshold pace in seconds per km"""
     zones = {
         "Easy": {"min": threshold_pace_sec * 1.5, "max": float('inf')},
         "Zone 2": {"min": threshold_pace_sec * 1.2, "max": threshold_pace_sec * 1.5},
@@ -632,7 +632,7 @@ def main():
         st.header("Training Zones Calculator")
         st.markdown("""
         <div class="result-box">
-        View your optimal training zones based on your running performances. These zones are calculated using the Yousli method, which uses your threshold pace as a reference.
+        View your optimal training zones based on your running performances. These zones are calculated using the Lindblom Coachings method, which uses your threshold pace as a reference.
         </div>
         """, unsafe_allow_html=True)
         
@@ -684,7 +684,7 @@ def main():
             zones = calculate_running_zones(threshold_pace_seconds)
             
             st.markdown("""
-            <h3 style="margin-top: 30px;">Yousli Running Zones</h3>
+            <h3 style="margin-top: 30px;">Lindblom Coaching Running Zones</h3>
             <p>These zones are based on your threshold pace and can be used to guide your training.</p>
             """, unsafe_allow_html=True)
             
