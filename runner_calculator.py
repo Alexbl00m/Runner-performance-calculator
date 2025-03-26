@@ -174,47 +174,6 @@ def main():
             <span style="font-weight: bold;">Pace:</span> {pace1_km} min/km | {pace1_mile} min/mile
             </div>
             """, unsafe_allow_html=True)
-    
-    with tab4:
-        st.header("About the Runner Performance Calculator")
-        
-        st.markdown("""
-        <div class="result-box">
-        <h3>How This Calculator Works</h3>
-        <p>The Runner Performance Calculator uses advanced mathematical models to predict your race times across different distances based on your previous performances. It employs a modified version of Peter Riegel's formula with an adaptive fatigue factor calculated from your input data.</p>
-        
-        <p>The basic equation used is:</p>
-        <p style="font-style: italic; font-weight: bold; text-align: center; margin: 20px 0;">
-            T2 = T1 × (D2/D1)<sup>f</sup>
-        </p>
-        
-        <p>Where:</p>
-        <ul>
-            <li>T2 is the predicted time for distance D2</li>
-            <li>T1 is your known time for distance D1</li>
-            <li>f is the fatigue factor (typically between 1.05 and 1.15)</li>
-        </ul>
-        
-        <p>When multiple performances are provided, the calculator employs curve fitting to determine the optimal fatigue factor specifically for you.</p>
-        </div>
-        
-        <div class="result-box">
-        <h3>Training Zones Methodology</h3>
-        <p>The training zones are calculated using the Lindblom Coaching 7-zone system, which is based on your threshold pace. The threshold is determined by analyzing your performances with special emphasis on races in the 5K-10K range, which typically represent a good approximation of lactate threshold for most runners.</p>
-        
-        <p>These zones provide structured intensity guidelines for different types of workouts, helping you train more efficiently and reduce the risk of injury by ensuring you're running at the appropriate effort level for each training session.</p>
-        </div>
-        
-        <div class="result-box">
-        <h3>Tips for Accurate Predictions</h3>
-        <ul>
-            <li>Use recent race results or time trials for the most accurate predictions</li>
-            <li>Include performances from different distances to improve the accuracy of the fatigue factor</li>
-            <li>For best results, at least one of your performances should be from a distance similar to your target race</li>
-            <li>Remember that predictions assume similar conditions (weather, terrain, elevation) and optimal race preparation</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
         
         with col2:
             st.subheader("Second Effort")
@@ -967,3 +926,44 @@ def main():
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+    with tab4:
+        st.header("About the Runner Performance Calculator")
+        
+        st.markdown("""
+        <div class="result-box">
+        <h3>How This Calculator Works</h3>
+        <p>The Runner Performance Calculator uses advanced mathematical models to predict your race times across different distances based on your previous performances. It employs a modified version of Peter Riegel's formula with an adaptive fatigue factor calculated from your input data.</p>
+        
+        <p>The basic equation used is:</p>
+        <p style="font-style: italic; font-weight: bold; text-align: center; margin: 20px 0;">
+            T2 = T1 × (D2/D1)<sup>f</sup>
+        </p>
+        
+        <p>Where:</p>
+        <ul>
+            <li>T2 is the predicted time for distance D2</li>
+            <li>T1 is your known time for distance D1</li>
+            <li>f is the fatigue factor (typically between 1.05 and 1.15)</li>
+        </ul>
+        
+        <p>When multiple performances are provided, the calculator employs curve fitting to determine the optimal fatigue factor specifically for you.</p>
+        </div>
+        
+        <div class="result-box">
+        <h3>Training Zones Methodology</h3>
+        <p>The training zones are calculated using the Lindblom Coaching 7-zone system, which is based on your threshold pace. The threshold is determined by analyzing your performances with special emphasis on races in the 5K-10K range, which typically represent a good approximation of lactate threshold for most runners.</p>
+        
+        <p>These zones provide structured intensity guidelines for different types of workouts, helping you train more efficiently and reduce the risk of injury by ensuring you're running at the appropriate effort level for each training session.</p>
+        </div>
+        
+        <div class="result-box">
+        <h3>Tips for Accurate Predictions</h3>
+        <ul>
+            <li>Use recent race results or time trials for the most accurate predictions</li>
+            <li>Include performances from different distances to improve the accuracy of the fatigue factor</li>
+            <li>For best results, at least one of your performances should be from a distance similar to your target race</li>
+            <li>Remember that predictions assume similar conditions (weather, terrain, elevation) and optimal race preparation</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
