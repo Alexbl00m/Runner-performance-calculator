@@ -754,176 +754,308 @@ def main():
             st.warning("Please enter at least one valid effort in the Race Predictor tab to calculate training zones.")
     
     with tab3:
-        st.header("Race Pace Calculator")
-        st.markdown("""
-        <div class="result-box">
-        Plan your race strategy by calculating split times and finish times. Enter your target pace or target time to get detailed lap breakdowns.
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("Race Information")
-            
-            # Race distance selection
-            race_options = {
-                "400m": 0.4,
-                "800m": 0.8,
-                "1000m": 1.0,
-                "1500m": 1.5,
-                "1 mile": 1.60934,
-                "3000m": 3.0,
-                "5K": 5.0,
-                "10K": 10.0,
-                "15K": 15.0,
-                "Half Marathon": 21.0975,
-                "Marathon": 42.195,
-                "Custom Distance": 0
-            }
-            
-            race_distance_choice = st.selectbox(
-                "Race Distance", 
-                list(race_options.keys()),
-                index=6,  # Default to 5K
-                key="pace_race_distance"
-            )
-            
-            # If custom distance is selected, allow user input
-            if race_distance_choice == "Custom Distance":
-                custom_distance = st.number_input("Enter distance in kilometers:", min_value=0.1, max_value=100.0, value=5.0, step=0.1)
-                race_distance_km = custom_distance
-            else:
-                race_distance_km = race_options[race_distance_choice]
-            
-            # Calculate lap and mile count
-            lap_count = race_distance_km / 0.4  # Standard track lap is 400m
-            mile_count = race_distance_km / 1.60934
-            
-            # Display track laps and miles
-            st.markdown(f"""
-            <div style="background-color: #f8f8f8; padding: 10px; border-radius: 5px; margin-top: 10px;">
-                <span style="font-weight: bold;">Distance:</span> {race_distance_km} km
-                <br><span style="font-weight: bold;">Track laps (400m):</span> {lap_count:.2f}
-                <br><span style="font-weight: bold;">Miles:</span> {mile_count:.2f}
+            st.header("Race Pace Calculator")
+            st.markdown("""
+            <div class="result-box">
+            Plan your race strategy by calculating split times and finish times. Enter your target pace or target time to get detailed lap breakdowns.
             </div>
             """, unsafe_allow_html=True)
             
-            # Allow user to select pace strategy
-            pace_strategy = st.radio(
-                "Pacing Strategy",
-                ["Even Pace", "Negative Split", "Positive Split"],
-                horizontal=True
-            )
+            col1, col2 = st.columns(2)
             
-            # Split settings based on strategy
-            if pace_strategy == "Even Pace":
-                st.info("Even pace: maintain the same pace throughout the entire race.")
-                split_factor = 0.0
-            elif pace_strategy == "Negative Split":
-                split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="+%g")
-                st.info(f"First half {split_factor:.0%} slower, second half {split_factor:.0%} faster")
-            else:  # Positive Split
-                split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="-%g")
-                st.info(f"First half {split_factor:.0%} faster, second half {split_factor:.0%} slower")
-                split_factor = -split_factor  # Negate for calculations
-        
-        with col2:
-            st.subheader("Pace Input")
-            
-            # Option to input by pace or time
-            input_method = st.radio(
-                "Input Method",
-                ["Target Pace", "Target Time"],
-                horizontal=True
-            )
-            
-            if input_method == "Target Pace":
-                pace_unit = st.radio("Pace Unit", ["min/km", "min/mile"], horizontal=True)
+            with col1:
+                st.subheader("Race Information")
                 
-                if pace_unit == "min/km":
-                    pace_input = st.text_input("Target Pace (min:sec per km)", "5:00")
-                    try:
-                        pace_parts = pace_input.split(":")
-                        if len(pace_parts) == 2:
-                            pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
-                            pace_seconds_per_km = pace_min * 60 + pace_sec
-                        else:
-                            pace_seconds_per_km = float(pace_input) * 60
-                        
-                        # Calculate total time
-                        total_seconds = pace_seconds_per_km * race_distance_km
-                        
-                    except ValueError:
-                        st.error("Please enter a valid pace in the format min:sec or decimal minutes")
-                        pace_seconds_per_km = 0
-                        total_seconds = 0
+                # Race distance selection
+                race_options = {
+                    "400m": 0.4,
+                    "800m": 0.8,
+                    "1000m": 1.0,
+                    "1500m": 1.5,
+                    "1 mile": 1.60934,
+                    "3000m": 3.0,
+                    "5K": 5.0,
+                    "10K": 10.0,
+                    "15K": 15.0,
+                    "Half Marathon": 21.0975,
+                    "Marathon": 42.195,
+                    "Custom Distance": 0
+                }
+                
+                race_distance_choice = st.selectbox(
+                    "Race Distance", 
+                    list(race_options.keys()),
+                    index=6,  # Default to 5K
+                    key="pace_race_distance"
+                )
+                
+                # If custom distance is selected, allow user input
+                if race_distance_choice == "Custom Distance":
+                    custom_distance = st.number_input("Enter distance in kilometers:", min_value=0.1, max_value=100.0, value=5.0, step=0.1)
+                    race_distance_km = custom_distance
                 else:
-                    pace_input = st.text_input("Target Pace (min:sec per mile)", "8:00")
-                    try:
-                        pace_parts = pace_input.split(":")
-                        if len(pace_parts) == 2:
-                            pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
-                            pace_seconds_per_mile = pace_min * 60 + pace_sec
-                        else:
-                            pace_seconds_per_mile = float(pace_input) * 60
-                        
-                        # Convert to seconds per km
-                        pace_seconds_per_km = pace_seconds_per_mile / 1.60934
-                        
-                        # Calculate total time
-                        total_seconds = pace_seconds_per_km * race_distance_km
-                        
-                    except ValueError:
-                        st.error("Please enter a valid pace in the format min:sec or decimal minutes")
-                        pace_seconds_per_km = 0
-                        total_seconds = 0
-            else:
-                # Input target finish time
-                col_h, col_m, col_s = st.columns(3)
-                with col_h:
-                    hours = st.number_input("Hours", min_value=0, max_value=24, value=0)
-                with col_m:
-                    minutes = st.number_input("Minutes", min_value=0, max_value=59, value=20)
-                with col_s:
-                    seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
+                    race_distance_km = race_options[race_distance_choice]
                 
-                total_seconds = hours * 3600 + minutes * 60 + seconds
-
-                # Calculate pace
-                if race_distance_km > 0:
-                    pace_seconds_per_km = total_seconds / race_distance_km
-                else:
-                    pace_seconds_per_km = 0
-            
-            # Calculate and display results if valid pace
-            if pace_seconds_per_km > 0:
-                # Convert back to min:sec format
-                pace_min = int(pace_seconds_per_km // 60)
-                pace_sec = int(pace_seconds_per_km % 60)
-                pace_km_formatted = f"{pace_min}:{pace_sec:02d}"
+                # Calculate lap and mile count
+                lap_count = race_distance_km / 0.4  # Standard track lap is 400m
+                mile_count = race_distance_km / 1.60934
                 
-                # Calculate mi/pace
-                pace_seconds_per_mile = pace_seconds_per_km * 1.60934
-                pace_mile_min = int(pace_seconds_per_mile // 60)
-                pace_mile_sec = int(pace_seconds_per_mile % 60)
-                pace_mile_formatted = f"{pace_mile_min}:{pace_mile_sec:02d}"
-                
-                # Calculate finish time
-                finish_time = seconds_to_time_str(total_seconds)
-                
+                # Display track laps and miles
                 st.markdown(f"""
-                <div class="result-box" style="margin-top: 20px; text-align: center;">
-                    <h3 style="color: #E6754E;">Race Summary</h3>
-                    <div style="font-size: 24px; font-weight: bold; margin: 15px 0;">
-                        {finish_time}
+                <div style="background-color: #f8f8f8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                    <span style="font-weight: bold;">Distance:</span> {race_distance_km} km
+                    <br><span style="font-weight: bold;">Track laps (400m):</span> {lap_count:.2f}
+                    <br><span style="font-weight: bold;">Miles:</span> {mile_count:.2f}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Allow user to select pace strategy
+                pace_strategy = st.radio(
+                    "Pacing Strategy",
+                    ["Even Pace", "Negative Split", "Positive Split"],
+                    horizontal=True
+                )
+                
+                # Split settings based on strategy
+                if pace_strategy == "Even Pace":
+                    st.info("Even pace: maintain the same pace throughout the entire race.")
+                    split_factor = 0.0
+                elif pace_strategy == "Negative Split":
+                    split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="+%g")
+                    st.info(f"First half {split_factor:.0%} slower, second half {split_factor:.0%} faster")
+                else:  # Positive Split
+                    split_factor = st.slider("First Half Adjustment:", min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="-%g")
+                    st.info(f"First half {split_factor:.0%} faster, second half {split_factor:.0%} slower")
+                    split_factor = -split_factor  # Negate for calculations
+            
+            with col2:
+                st.subheader("Pace Input")
+                
+                # Option to input by pace or time
+                input_method = st.radio(
+                    "Input Method",
+                    ["Target Pace", "Target Time"],
+                    horizontal=True
+                )
+                
+                if input_method == "Target Pace":
+                    pace_unit = st.radio("Pace Unit", ["min/km", "min/mile"], horizontal=True)
+                    
+                    if pace_unit == "min/km":
+                        pace_input = st.text_input("Target Pace (min:sec per km)", "5:00")
+                        try:
+                            pace_parts = pace_input.split(":")
+                            if len(pace_parts) == 2:
+                                pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
+                                pace_seconds_per_km = pace_min * 60 + pace_sec
+                            else:
+                                pace_seconds_per_km = float(pace_input) * 60
+                            
+                            # Calculate total time
+                            total_seconds = pace_seconds_per_km * race_distance_km
+                            
+                        except ValueError:
+                            st.error("Please enter a valid pace in the format min:sec or decimal minutes")
+                            pace_seconds_per_km = 0
+                            total_seconds = 0
+                    else:
+                        pace_input = st.text_input("Target Pace (min:sec per mile)", "8:00")
+                        try:
+                            pace_parts = pace_input.split(":")
+                            if len(pace_parts) == 2:
+                                pace_min, pace_sec = int(pace_parts[0]), int(pace_parts[1])
+                                pace_seconds_per_mile = pace_min * 60 + pace_sec
+                            else:
+                                pace_seconds_per_mile = float(pace_input) * 60
+                            
+                            # Convert to seconds per km
+                            pace_seconds_per_km = pace_seconds_per_mile / 1.60934
+                            
+                            # Calculate total time
+                            total_seconds = pace_seconds_per_km * race_distance_km
+                            
+                        except ValueError:
+                            st.error("Please enter a valid pace in the format min:sec or decimal minutes")
+                            pace_seconds_per_km = 0
+                            total_seconds = 0
+                else:
+                    # Input target finish time
+                    col_h, col_m, col_s = st.columns(3)
+                    with col_h:
+                        hours = st.number_input("Hours", min_value=0, max_value=24, value=0)
+                    with col_m:
+                        minutes = st.number_input("Minutes", min_value=0, max_value=59, value=20)
+                    with col_s:
+                        seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
+                    
+                    total_seconds = hours * 3600 + minutes * 60 + seconds
+                    
+                    # Calculate pace
+                    if race_distance_km > 0:
+                        pace_seconds_per_km = total_seconds / race_distance_km
+                    else:
+                        pace_seconds_per_km = 0
+                
+                # Calculate and display results if valid pace
+                if pace_seconds_per_km > 0:
+                    # Convert back to min:sec format
+                    pace_min = int(pace_seconds_per_km // 60)
+                    pace_sec = int(pace_seconds_per_km % 60)
+                    pace_km_formatted = f"{pace_min}:{pace_sec:02d}"
+                    
+                    # Calculate mi/pace
+                    pace_seconds_per_mile = pace_seconds_per_km * 1.60934
+                    pace_mile_min = int(pace_seconds_per_mile // 60)
+                    pace_mile_sec = int(pace_seconds_per_mile % 60)
+                    pace_mile_formatted = f"{pace_mile_min}:{pace_mile_sec:02d}"
+                    
+                    # Calculate finish time
+                    finish_time = seconds_to_time_str(total_seconds)
+                    
+                    st.markdown(f"""
+                    <div class="result-box" style="margin-top: 20px; text-align: center;">
+                        <h3 style="color: #E6754E;">Race Summary</h3>
+                        <div style="font-size: 24px; font-weight: bold; margin: 15px 0;">
+                            {finish_time}
+                        </div>
+                        <div style="font-size: 16px; margin-bottom: 5px;">
+                            Pace: {pace_km_formatted} min/km | {pace_mile_formatted} min/mile
+                        </div>
+                        <div style="font-size: 14px; color: #666;">
+                            Speed: {(60 / (pace_seconds_per_km / 60)):.2f} km/h | {(60 / (pace_seconds_per_km / 60) / 1.60934):.2f} mph
+                        </div>
                     </div>
-                    <div style="font-size: 16px; margin-bottom: 5px;">
-                        Pace: {pace_km_formatted} min/km | {pace_mile_formatted} min/mile
-                    </div>
-                    <div style="font-size: 14px; color: #666;">
-                        Speed: {(60 / (pace_seconds_per_km / 60)):.2f} km/h | {(60 / (pace_seconds_per_km / 60) / 1.60934):.2f} mph
-                    </div>
+                    """, unsafe_allow_html=True)
+                
+            # If we have valid pace, calculate and display splits
+            if pace_seconds_per_km > 0 and race_distance_km > 0:
+                st.markdown("### Race Splits")
+                
+                # Determine if kilometer or mile splits are more appropriate
+                if race_distance_km < 3:
+                    # For shorter races, use 400m splits
+                    split_distance = 0.4  # km
+                    split_label = "400m"
+                    num_splits = int(race_distance_km / split_distance)
+                    partial_split = race_distance_km % split_distance
+                elif race_distance_km < 10:
+                    # For medium races, use kilometer splits
+                    split_distance = 1.0  # km
+                    split_label = "1 km"
+                    num_splits = int(race_distance_km)
+                    partial_split = race_distance_km - num_splits
+                else:
+                    # For longer races, use mile splits
+                    split_distance = 1.60934  # km (1 mile)
+                    split_label = "1 mile"
+                    num_splits = int(race_distance_km / split_distance)
+                    partial_split = race_distance_km % split_distance
+                
+                # Calculate split times based on strategy
+                splits_data = []
+                halfway_point = num_splits / 2
+                cumulative_time = 0
+                
+                for i in range(1, num_splits + 1):
+                    # For negative/positive splits, adjust based on position in race
+                    if pace_strategy == "Even Pace":
+                        adjusted_pace = pace_seconds_per_km
+                    else:
+                        if i <= halfway_point:
+                            adjusted_pace = pace_seconds_per_km * (1 + split_factor)
+                        else:
+                            adjusted_pace = pace_seconds_per_km * (1 - split_factor)
+                    
+                    split_time = adjusted_pace * split_distance
+                    cumulative_time += split_time
+                    
+                    splits_data.append({
+                        "Split": f"{i} ({split_label})",
+                        "Distance": f"{i * split_distance:.2f} km",
+                        "Split Time": seconds_to_time_str(split_time),
+                        "Pace": format_pace(adjusted_pace),
+                        "Cumulative Time": seconds_to_time_str(cumulative_time)
+                    })
+                
+                # Add partial split if needed
+                if partial_split > 0.01:  # Only if it's significant
+                    # For the partial split, use the final pace adjustment
+                    if pace_strategy == "Even Pace":
+                        adjusted_pace = pace_seconds_per_km
+                    else:
+                        adjusted_pace = pace_seconds_per_km * (1 - split_factor)
+                    
+                    split_time = adjusted_pace * partial_split
+                    cumulative_time += split_time
+                    
+                    splits_data.append({
+                        "Split": f"Final ({partial_split*1000:.0f}m)",
+                        "Distance": f"{race_distance_km:.2f} km",
+                        "Split Time": seconds_to_time_str(split_time),
+                        "Pace": format_pace(adjusted_pace),
+                        "Cumulative Time": seconds_to_time_str(cumulative_time)
+                    })
+                
+                # Display splits in a table
+                splits_df = pd.DataFrame(splits_data)
+                st.dataframe(splits_df, hide_index=True, use_container_width=True)
+                
+                # Create a visualization of split paces
+                st.markdown("### Split Visualization")
+                
+                fig = px.bar(
+                    splits_data, 
+                    x="Split", 
+                    y=[format_pace(pace_seconds_per_km)]*len(splits_data), 
+                    title="Race Splits vs. Target Pace",
+                    labels={"y": "Pace (min/km)", "x": "Split"}
+                )
+                
+                # Add a line for target pace
+                fig.add_shape(
+                    type="line",
+                    x0=-0.5,
+                    x1=len(splits_data)-0.5,
+                    y0=format_pace(pace_seconds_per_km),
+                    y1=format_pace(pace_seconds_per_km),
+                    line=dict(
+                        color="red",
+                        width=2,
+                        dash="dash",
+                    )
+                )
+                
+                # Add annotation for target pace
+                fig.add_annotation(
+                    x=len(splits_data)-0.5,
+                    y=format_pace(pace_seconds_per_km),
+                    text=f"Target Pace: {format_pace(pace_seconds_per_km)} min/km",
+                    showarrow=False,
+                    yshift=10,
+                    font=dict(color="red")
+                )
+                
+                # Customize layout
+                fig.update_layout(
+                    template="plotly_white",
+                    height=400,
+                    xaxis_title="Race Segments",
+                    yaxis_title="Pace (min/km)"
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Add tips for race execution
+                st.markdown("""
+                <div class="result-box">
+                    <h3>Race Execution Tips</h3>
+                    <ul>
+                        <li><strong>Start conservatively</strong> - Many runners go out too fast and pay for it later</li>
+                        <li><strong>Focus on effort</strong> - Pay attention to your perceived exertion rather than just the watch</li>
+                        <li><strong>Adjust for conditions</strong> - Heat, wind, and hills will affect your pace; be flexible</li>
+                        <li><strong>Fuel properly</strong> - For races over 75 minutes, ensure adequate carbohydrate intake</li>
+                        <li><strong>Mental check-ins</strong> - Break the race into segments and focus on executing each segment well</li>
+                    </ul>
                 </div>
                 """, unsafe_allow_html=True)
 
